@@ -1,5 +1,5 @@
 function love.load()
-    love.window.setTitle("4 Paddle Pong")
+    love.window.setTitle("Quadruple Pong")
     love.window.setMode(800, 600)
     bgColor = {33/255, 33/255, 33/255}
 
