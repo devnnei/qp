@@ -7,7 +7,6 @@ function love.load()
     logo = love.graphics.newImage("assets/logo.png")
     playButton = love.graphics.newImage("assets/play.png")
     introVideo = love.graphics.newVideo("assets/intro.ogv")
-    introVideo:play()
 
     paddleImages = {
         horizontal = {
@@ -20,11 +19,15 @@ function love.load()
         }
     }
 
+    music = love.audio.newSource("assets/music.ogg", "stream")
+    music:setLooping(true)
+
     state = "intro"
 
-    buttonX, buttonY = 193, 450
-    buttonScale = 0.8
     logoScale = 0.8
+    buttonScale = 0.5
+    buttonX = 400 - playButton:getWidth()*buttonScale/2
+    buttonY = 100 + logo:getHeight()*logoScale + 20
 
     paddleSpeed = 200
     paddles = {
@@ -35,11 +38,16 @@ function love.load()
     }
 
     ball = {x = 400, y = 300, r = 10, dx = 200, dy = 150}
+
+    introVideo:play()
 end
 
 function love.update(dt)
     if state == "intro" then
-        if not introVideo:isPlaying() then state = "menu" end
+        if not introVideo:isPlaying() then
+            state = "menu"
+            love.audio.play(music)
+        end
         return
     end
 
@@ -89,7 +97,7 @@ function love.draw()
     elseif state == "menu" then
         love.graphics.draw(logo, 400 - logo:getWidth()*logoScale/2, 100, 0, logoScale, logoScale)
         love.graphics.draw(playButton, buttonX, buttonY, 0, buttonScale, buttonScale)
-        love.graphics.print("Click the button to start!", 300, 420)
+        love.graphics.print("Click the button to start!", 300, buttonY + playButton:getHeight()*buttonScale + 10)
     elseif state == "playing" then
         for _, p in pairs(paddles) do
             local img
