@@ -1,17 +1,14 @@
 function love.load()
     love.window.setTitle("4 Paddle Pong")
-    love.window.setMode(800, 600) -- game window
+    love.window.setMode(800, 600)
 
-    -- Colors
-    bgColor = {33/255, 33/255, 33/255} -- #212121
+    bgColor = {33/255, 33/255, 33/255}
 
-    -- Load menu assets
-    logo = love.graphics.newImage("assets/logo.png")         -- 541x315
-    playButton = love.graphics.newImage("assets/play.png")   -- 414x414
+    logo = love.graphics.newImage("assets/logo.png")
+    playButton = love.graphics.newImage("assets/play.png")
     introVideo = love.graphics.newVideo("assets/intro.ogv")
     introVideo:play()
 
-    -- Paddle images
     paddleImages = {
         horizontal = {
             love.graphics.newImage("assets/paddles/horizontal1.png"),
@@ -23,15 +20,12 @@ function love.load()
         }
     }
 
-    -- State
-    state = "intro" -- intro → menu → playing
+    state = "intro"
 
-    -- Menu
-    buttonX, buttonY = 193, 450       -- scale adjusted for 414x414 button
-    buttonScale = 0.8                  -- scale the play button
-    logoScale = 0.8                    -- scale logo to fit nicely
+    buttonX, buttonY = 193, 450
+    buttonScale = 0.8
+    logoScale = 0.8
 
-    -- Paddles
     paddleSpeed = 200
     paddles = {
         top    = {x = 350, y = 0,    w = 100, h = 20, dx = 1, dy = 0, type = "horizontal"},
@@ -40,7 +34,6 @@ function love.load()
         right  = {x = 780, y = 250,  w = 20, h = 100, dx = 0, dy = -1, type = "vertical"}
     }
 
-    -- Ball
     ball = {x = 400, y = 300, r = 10, dx = 200, dy = 150}
 end
 
@@ -52,7 +45,6 @@ function love.update(dt)
 
     if state ~= "playing" then return end
 
-    -- Move paddles
     for _, p in pairs(paddles) do
         p.x = p.x + p.dx * paddleSpeed * dt
         p.y = p.y + p.dy * paddleSpeed * dt
@@ -69,11 +61,9 @@ function love.update(dt)
         end
     end
 
-    -- Move ball
     ball.x = ball.x + ball.dx * dt
     ball.y = ball.y + ball.dy * dt
 
-    -- Ball collisions
     local hit = false
     for _, p in pairs(paddles) do
         if checkCollision(ball, p) then
@@ -84,7 +74,6 @@ function love.update(dt)
         end
     end
 
-    -- Reset ball if missed
     if not hit and (ball.x - ball.r < 0 or ball.x + ball.r > 800 or ball.y - ball.r < 0 or ball.y + ball.r > 600) then
         resetBall()
     end
