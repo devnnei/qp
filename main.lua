@@ -1,7 +1,6 @@
 function love.load()
     love.window.setTitle("4 Paddle Pong")
     love.window.setMode(800, 600)
-
     bgColor = {33/255, 33/255, 33/255}
 
     logo = love.graphics.newImage("assets/logo.png")
@@ -31,13 +30,17 @@ function love.load()
 
     paddleSpeed = 200
     paddles = {
-        top    = {x = 350, y = 0,    w = 100, h = 20, dx = 1, dy = 0, type = "horizontal"},
-        bottom = {x = 350, y = 580,  w = 100, h = 20, dx = -1, dy = 0, type = "horizontal"},
-        left   = {x = 0,   y = 250,  w = 20, h = 100, dx = 0, dy = 1, type = "vertical"},
-        right  = {x = 780, y = 250,  w = 20, h = 100, dx = 0, dy = -1, type = "vertical"}
+        top    = {x = 350, y = 0, w = 100, h = 20, dx = 1, dy = 0, type = "horizontal"},
+        bottom = {x = 350, y = 580, w = 100, h = 20, dx = -1, dy = 0, type = "horizontal"},
+        left   = {x = 0, y = 250, w = 20, h = 100, dx = 0, dy = 1, type = "vertical"},
+        right  = {x = 780, y = 250, w = 20, h = 100, dx = 0, dy = -1, type = "vertical"}
     }
 
     ball = {x = 400, y = 300, r = 10, dx = 200, dy = 150}
+    score = 0
+
+    font = love.graphics.newFont("assets/fonts/rainyhearts.ttf", 48)
+    love.graphics.setFont(font)
 
     introVideo:play()
 end
@@ -59,30 +62,40 @@ function love.update(dt)
 
         if p.dx ~= 0 then
             if p.x <= 0 then p.x = 0; p.dx = 1
-            elseif p.x + p.w >= 800 then p.x = 800 - p.w; p.dx = -1
-            end
+            elseif p.x + p.w >= 800 then p.x = 800 - p.w; p.dx = -1 end
         end
         if p.dy ~= 0 then
             if p.y <= 0 then p.y = 0; p.dy = 1
-            elseif p.y + p.h >= 600 then p.y = 600 - p.h; p.dy = -1
-            end
+            elseif p.y + p.h >= 600 then p.y = 600 - p.h; p.dy = -1 end
         end
     end
 
     ball.x = ball.x + ball.dx * dt
     ball.y = ball.y + ball.dy * dt
 
-    local hit = false
     for _, p in pairs(paddles) do
         if checkCollision(ball, p) then
-            ball.dx = -ball.dx
-            ball.dy = -ball.dy
-            hit = true
+            score = score + 1
+            if p.type == "horizontal" then
+                ball.dy = -ball.dy
+                if ball.dy > 0 then
+                    ball.y = p.y + p.h + ball.r
+                else
+                    ball.y = p.y - ball.r
+                end
+            else
+                ball.dx = -ball.dx
+                if ball.dx > 0 then
+                    ball.x = p.x + p.w + ball.r
+                else
+                    ball.x = p.x - ball.r
+                end
+            end
             break
         end
     end
 
-    if not hit and (ball.x - ball.r < 0 or ball.x + ball.r > 800 or ball.y - ball.r < 0 or ball.y + ball.r > 600) then
+    if ball.x - ball.r < 0 or ball.x + ball.r > 800 or ball.y - ball.r < 0 or ball.y + ball.r > 600 then
         resetBall()
     end
 end
@@ -97,7 +110,6 @@ function love.draw()
     elseif state == "menu" then
         love.graphics.draw(logo, 400 - logo:getWidth()*logoScale/2, 100, 0, logoScale, logoScale)
         love.graphics.draw(playButton, buttonX, buttonY, 0, buttonScale, buttonScale)
-        love.graphics.print("Click the button to start!", 300, buttonY + playButton:getHeight()*buttonScale + 10)
     elseif state == "playing" then
         for _, p in pairs(paddles) do
             local img
@@ -109,13 +121,13 @@ function love.draw()
             love.graphics.draw(img, p.x, p.y, 0, p.w / img:getWidth(), p.h / img:getHeight())
         end
         love.graphics.circle("fill", ball.x, ball.y, ball.r)
-        love.graphics.print("Click paddles to flip their direction.", 10, 10)
+        love.graphics.setColor(1,1,1)
+        love.graphics.print("Score: "..score, 10, 10)
     end
 end
 
 function love.mousepressed(mx, my, button)
     if button ~= 1 then return end
-
     if state == "menu" then
         local bw, bh = playButton:getWidth()*buttonScale, playButton:getHeight()*buttonScale
         if mx >= buttonX and mx <= buttonX + bw and my >= buttonY and my <= buttonY + bh then
@@ -145,4 +157,5 @@ function resetBall()
     local speed = 200
     ball.dx = math.cos(angle) * speed
     ball.dy = math.sin(angle) * speed
+    score = 0
 end
